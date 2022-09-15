@@ -15,7 +15,7 @@
 $ npm install
 ```
 
-2. Mengatur file ".env" yang perlu diisi. Contohnya ada di .env.example
+2. Mengatur file ".env" yang perlu diisi. Contohnya ada di file ".env_example"
 
 ```
 MYSQL_HOST= //  localhost
