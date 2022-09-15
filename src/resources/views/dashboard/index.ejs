@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="static/output.css">
+    <link rel="stylesheet" href="static/default.css">
+    <title>Dashboard - <%= user.nama_lengkap %></title>
+  </head>
+  <body>
+    <% if(user.level === 5 || user.level === 0 || user.level === 3) { %>
+      <%- include("admin.ejs", {user: user}) %>
+    <% } else if(user.level === 1 || user.level === 2) { %>
+      <%- include("guru.ejs", {user: user}) %>
+    <% } else if(user.level === 4) { %>
+      <%- include("siswa.ejs", {user: user}) %>
+    <% } else { %>
+      <h1 class="text-2xl">No Access</h1>
+    <% } %>
+  </body>
+</html>

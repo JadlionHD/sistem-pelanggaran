@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="static/output.css" />
+    <link rel="stylesheet" href="static/default.css" />
+    <style>
+      body {
+        background-image: url(../static/blur.jpg);
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center center;
+        background-attachment: fixed;
+      }
+    </style>
+    <title>Login</title>
+  </head>
+  <body>
+    <div class="main">
+      <form action="auth/login" method="POST" class="block mx-auto mt-28 w-2/6 bg-slate-50 rounded-md py-6">
+        <p class="text-3xl text-center">LOGIN</p>
+        <hr class="my-7" />
+        <div class="my-3">
+          <input
+            class="block mx-auto rounded-md w-7/12 py-2 pl-2 bg-gray-100 focus:bg-gray-200"
+            placeholder="Username"
+            type="text"
+            name="username"
+            id="username"
+            required
+            autocomplete="off"
+          />
+        </div>
+        <div class="my-3">
+          <input
+            class="block mx-auto rounded-md w-7/12 py-2 pl-2 bg-gray-100 focus:bg-gray-200"
+            placeholder="Password"
+            type="password"
+            name="password"
+            id="password"
+            required
+            autocomplete="off"
+          />
+        </div>
+        <div class="mb-3">
+          <select
+            class="block mx-auto rounded-md w-7/12 py-2 pl-2 bg-gray-100 focus:bg-gray-200"
+            name="sebagai"
+            id="sebagai"
+            onchange="cekUser(this)"
+            required
+          >
+            <option value="">Pilih</option>
+            <option value="0">Kepala Sekolah</option>
+            <option value="1">Wali Kelas</option>
+            <option value="2">Guru BK</option>
+            <option value="3">Wakil Kepala Sekolah</option>
+            <option value="4">Siswa</option>
+            <option value="5">Administrator</option>
+          </select>
+        </div>
+        <hr class="my-7" />
+        <input
+          class="block mx-auto text-white bg-blue-300 transition ease-in-out hover:scale-110 hover:bg-blue-400 rounded-md px-20 py-2"
+          type="submit"
+          name="submit"
+          value="Login"
+        />
+      </form>
+    </div>
+    <script>
+      function cekUser(ev) {
+        const passInp = document.querySelector("input#password");
+        const userInp = document.querySelector("input#username");
+
+        if (ev.value === "4") {
+          userInp.placeholder = "NIS";
+          passInp.name = "tgl_lahir";
+
+          userInp.type = "number";
+          passInp.type = "date";
+        } else {
+          userInp.placeholder = "Username";
+          passInp.name = "password";
+
+          userInp.type = "text";
+          passInp.type = "password";
+        }
+      }
+    </script>
+  </body>
+</html>
