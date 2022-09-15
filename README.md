@@ -1,4 +1,4 @@
-# sistem-pelanggaran
+# sistem-pelanggaran (not done yet)
 
 > Website yang digunakan untuk melihat pelanggaran yang dilanggar oleh siswa
 
