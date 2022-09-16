@@ -78,17 +78,22 @@ class Server {
       logging: false
     });
 
-    sequelize.authenticate().then(() => {
-      console.log("Sucessfully connected");
-      // this.sequelize = sequelize;
-      let psport = require("./Strategy.js");
-      new psport(sequelize).run();
-      fs.readdirSync("src/models").forEach((f) => {
-        const Models = require(`../models/${f}`);
-        let models = new Models(sequelize);
-        models.run();
+    sequelize
+      .authenticate()
+      .then(() => {
+        console.log("Sucessfully connected");
+        // this.sequelize = sequelize;
+        let psport = require("./Strategy.js");
+        new psport(sequelize).run();
+        fs.readdirSync("src/models").forEach((f) => {
+          const Models = require(`../models/${f}`);
+          let models = new Models(sequelize);
+          models.run();
+        });
+      })
+      .catch((r) => {
+        console.log("Failed", r.message);
       });
-    });
   }
 }
 
