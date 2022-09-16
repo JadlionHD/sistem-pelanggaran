@@ -6,7 +6,6 @@ router.get("/hello", (req, res) => {
   res.json({ message: "Hello world" });
 });
 
-router.post("/auth", passport.authenticate("local"));
 router.get("/logout", (req, res) => {
   if (req.user) {
     req.logout((err) => {
