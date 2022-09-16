@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const IModel = require("../abstracts/IModel");
 
-class User extends IModel {
+class Kelas extends IModel {
   /**
    * @param {Sequelize} sequelize
    */
@@ -11,37 +11,30 @@ class User extends IModel {
   }
   run() {
     this.sequelize.define(
-      "user",
+      "kelas",
       {
         id: {
           type: DataTypes.INTEGER.UNSIGNED,
           autoIncrement: true,
+          unique: true,
           primaryKey: true
         },
-        username: {
-          type: DataTypes.STRING,
-          values: 255,
-          allowNull: false
-        },
-        nama_lengkap: {
-          type: DataTypes.STRING,
-          values: 255,
-          allowNull: false
-        },
-        pass: {
-          type: DataTypes.STRING,
-          values: 255,
-          allowNull: false
-        },
-        level: {
+        kelas: {
           type: DataTypes.INTEGER,
-          values: 11,
-          allowNull: false
+          values: 20
+        },
+        jurusan: {
+          type: DataTypes.STRING,
+          values: 255
+        },
+        ruang: {
+          type: DataTypes.STRING,
+          values: 255
         }
       },
-      { tableName: "user" }
+      { tableName: "kelas" }
     );
   }
 }
 
-module.exports = User;
+module.exports = Kelas;
