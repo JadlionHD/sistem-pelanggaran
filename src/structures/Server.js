@@ -75,7 +75,7 @@ class Server {
       username: process.env.MYSQL_USERNAME,
       password: process.env.MYSQL_PASS,
       port: parseInt(process.env.MYSQL_PORT),
-      logging: false
+      logging: true
     });
 
     sequelize
@@ -89,6 +89,10 @@ class Server {
           const Models = require(`../models/${f}`);
           let models = new Models(sequelize);
           models.run();
+        });
+        sequelize.sync({
+          force: process.env.MYSQL_FORCE_REPLACE === "true" ? true : false,
+          alter: process.env.MYSQL_ALTER === "true" ? true : false
         });
       })
       .catch((r) => {
