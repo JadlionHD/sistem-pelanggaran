@@ -92,7 +92,7 @@ class Server {
         });
       })
       .catch((r) => {
-        console.log("Failed", r.message);
+        console.log("Failed to", r.message);
       });
   }
 }
