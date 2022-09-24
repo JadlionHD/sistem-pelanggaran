@@ -1,60 +1,33 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Knex } = require("knex");
 const IModel = require("../abstracts/IModel");
 
 class Guru extends IModel {
   /**
-   * @param {Sequelize} sequelize
+   * @param {Knex} knex
    */
-  constructor(sequelize) {
+  constructor(knex) {
     super();
-    this.sequelize = sequelize;
+    this.knex = knex;
   }
-  run() {
-    this.sequelize.define(
-      "user_guru",
-      {
-        id: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          autoIncrement: true,
-          unique: true,
-          primaryKey: true
-        },
-        username: {
-          type: DataTypes.STRING,
-          values: 255,
-          allowNull: false
-        },
-        nama_lengkap: {
-          type: DataTypes.STRING,
-          values: 255,
-          allowNull: false
-        },
-        nip: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          allowNull: true
-        },
-        pass: {
-          type: DataTypes.STRING,
-          values: 255,
-          allowNull: false
-        },
-        level: {
-          type: DataTypes.INTEGER,
-          values: 11,
-          allowNull: false
-        },
-        kelas_id: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          unique: true,
-          references: {
-            model: "kelas",
-            key: "id"
-          },
-          allowNull: true
-        }
-      },
-      { tableName: "user_guru" }
-    );
+  async run() {
+    this.knex.schema.hasTable("user_guru").then((exist) => {
+      if (!exist) {
+        this.knex.schema
+          .createTable("user_guru", (tb) => {
+            tb.increments("id", { primaryKey: true }).unsigned().unique();
+            tb.string("username", 255).notNullable();
+            tb.string("nama_lengkap", 255).notNullable();
+            tb.integer("nip").unsigned().nullable();
+            tb.string("pass", 255).notNullable();
+            tb.integer("level").notNullable();
+            tb.integer("kelas_id").unsigned().references("kelas.id");
+            tb.timestamps(true, true, true);
+          })
+          .then(async () => {
+            await this.knex("user_guru").insert({ username: "gurubk", nama_lengkap: "Agus", nip: null, pass: "123", level: 2, kelas_id: 1 });
+          });
+      }
+    });
   }
 }
 

@@ -1,46 +1,32 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Knex } = require("knex");
 const IModel = require("../abstracts/IModel");
 
 class User extends IModel {
   /**
-   * @param {Sequelize} sequelize
+   * @param {Knex} knex
    */
-  constructor(sequelize) {
+  constructor(knex) {
     super();
-    this.sequelize = sequelize;
+    this.knex = knex;
   }
-  run() {
-    this.sequelize.define(
-      "user",
-      {
-        id: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          autoIncrement: true,
-          primaryKey: true
-        },
-        username: {
-          type: DataTypes.STRING,
-          values: 255,
-          allowNull: false
-        },
-        nama_lengkap: {
-          type: DataTypes.STRING,
-          values: 255,
-          allowNull: false
-        },
-        pass: {
-          type: DataTypes.STRING,
-          values: 255,
-          allowNull: false
-        },
-        level: {
-          type: DataTypes.INTEGER,
-          values: 11,
-          allowNull: false
-        }
-      },
-      { tableName: "user" }
-    );
+  async run() {
+    this.knex.schema.hasTable("user").then((exist) => {
+      if (!exist) {
+        this.knex.schema
+          .createTable("user", (tb) => {
+            tb.increments("id", { primaryKey: true });
+
+            tb.string("username", 255).notNullable();
+            tb.string("nama_lengkap", 255).notNullable();
+            tb.string("pass", 255).notNullable();
+            tb.integer("level").notNullable();
+            tb.timestamps(true, true, true);
+          })
+          .then(async () => {
+            await this.knex("user").insert({ username: "admin", nama_lengkap: "Pesulap Merah", pass: "123", level: 5 });
+          });
+      }
+    });
   }
 }
 

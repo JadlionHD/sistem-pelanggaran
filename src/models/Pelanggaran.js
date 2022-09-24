@@ -1,53 +1,33 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Knex } = require("knex");
 const IModel = require("../abstracts/IModel");
 
 class Pelanggaran extends IModel {
   /**
-   * @param {Sequelize} sequelize
+   * @param {Knex} knex
    */
-  constructor(sequelize) {
+  constructor(knex) {
     super();
-    this.sequelize = sequelize;
+    this.knex = knex;
   }
-  run() {
-    this.sequelize.define(
-      "pelanggaran_siswa",
-      {
-        id: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          autoIncrement: true,
-          primaryKey: true
-        },
-        nis: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          unique: true,
-          references: {
-            model: "user_siswa",
-            key: "nis"
-          }
-        },
-        nama_pelanggaran: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          unique: true,
-          references: {
-            model: "nama_pelanggaran",
-            key: "id"
-          }
-        },
-        point_pelanggaran: {
-          type: DataTypes.INTEGER
-        },
-        dari_guru: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          unique: true,
-          references: {
-            model: "user_guru",
-            key: "id"
-          }
-        }
-      },
-      { tableName: "pelanggaran_siswa" }
-    );
+  async run() {
+    this.knex.schema.hasTable("pelanggaran_siswa").then((exist) => {
+      if (!exist) {
+        this.knex.schema
+          .createTable("pelanggaran_siswa", (tb) => {
+            tb.increments("id", { primaryKey: true }).unsigned();
+            tb.integer("nis").unsigned().notNullable().references("user_siswa.nis");
+            tb.integer("nama_pelanggaran").unsigned().references("nama_pelanggaran.id");
+            tb.integer("dari_guru").unsigned().references("user_guru.id");
+            tb.timestamps(true, true, true);
+          })
+          .then(async () => {
+            await this.knex("pelanggaran_siswa").insert([
+              { nis: 12345, nama_pelanggaran: 1, dari_guru: 1 },
+              { nis: 12345, nama_pelanggaran: 2, dari_guru: 1 }
+            ]);
+          });
+      }
+    });
   }
 }
 

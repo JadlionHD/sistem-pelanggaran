@@ -1,11 +1,11 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Knex } = require("knex");
 
 class IModel {
   /**
-   * @param {Sequelize} sequelize
+   * @param {Knex} knex
    */
-  constructor(sequelize) {
-    this.sequelize = sequelize;
+  constructor(knex) {
+    this.knex = knex;
   }
 
   run() {}

@@ -1,31 +1,32 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Knex } = require("knex");
 const IModel = require("../abstracts/IModel");
 
 class NamaPelanggaran extends IModel {
   /**
-   * @param {Sequelize} sequelize
+   * @param {Knex} knex
    */
-  constructor(sequelize) {
+  constructor(knex) {
     super();
-    this.sequelize = sequelize;
+    this.knex = knex;
   }
-  run() {
-    this.sequelize.define(
-      "nama_pelanggaran",
-      {
-        id: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          autoIncrement: true,
-          unique: true,
-          primaryKey: true
-        },
-        nama: {
-          type: DataTypes.STRING,
-          values: 255
-        }
-      },
-      { tableName: "nama_pelanggaran" }
-    );
+  async run() {
+    this.knex.schema.hasTable("nama_pelanggaran").then((exist) => {
+      if (!exist) {
+        this.knex.schema
+          .createTable("nama_pelanggaran", (tb) => {
+            tb.increments("id", { primaryKey: true }).unsigned().unique();
+            tb.string("nama", 255);
+            tb.integer("point");
+            tb.timestamps(true, true, true);
+          })
+          .then(async () => {
+            await this.knex("nama_pelanggaran").insert([
+              { nama: "Bolos", point: 50 },
+              { nama: "Telat", point: 10 }
+            ]);
+          });
+      }
+    });
   }
 }
 

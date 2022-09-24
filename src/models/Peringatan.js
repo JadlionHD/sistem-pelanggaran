@@ -1,46 +1,26 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Knex } = require("knex");
 const IModel = require("../abstracts/IModel");
 
 class Pelanggaran extends IModel {
   /**
-   * @param {Sequelize} sequelize
+   * @param {Knex} knex
    */
-  constructor(sequelize) {
+  constructor(knex) {
     super();
-    this.sequelize = sequelize;
+    this.knex = knex;
   }
-  run() {
-    this.sequelize.define(
-      "status_peringatan",
-      {
-        id: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          autoIncrement: true,
-          primaryKey: true
-        },
-        nis: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          unique: true,
-          references: {
-            model: "user_siswa",
-            key: "nis"
-          }
-        },
-        dari_guru: {
-          type: DataTypes.INTEGER.UNSIGNED,
-          unique: true,
-          references: {
-            model: "user_guru",
-            key: "id"
-          }
-        },
-        pesan: {
-          type: DataTypes.STRING,
-          values: 255
-        }
-      },
-      { tableName: "status_peringatan" }
-    );
+  async run() {
+    this.knex.schema.hasTable("status_peringatan").then(async (exist) => {
+      if (!exist) {
+        this.knex.schema.createTable("status_peringatan", (tb) => {
+          tb.increments("id", { primaryKey: true }).unsigned();
+          tb.integer("nis").unsigned().references("user_siswa.nis");
+          tb.integer("dari_guru").unsigned().references("user_guru.id");
+          tb.string("pesan", 255);
+          tb.timestamps(true, true, true);
+        });
+      }
+    });
   }
 }
 
