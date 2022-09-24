@@ -1,5 +1,4 @@
 const fs = require("fs");
-const { Sequelize, DataTypes } = require("sequelize");
 const bodyparser = require("body-parser");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
@@ -53,14 +52,10 @@ class Server {
     this.app.use(passport.session());
 
     this.app.get("/", (req, res) => {
-      if (req.user) return res.redirect("../../dashboard");
       console.log("ROOT", req.user);
+      if (req.user) return res.redirect("../../dashboard");
       res.render("login.ejs");
     });
-
-    this.app.use("/api", require("../routes/api.js"));
-    this.app.use("/auth", require("../routes/auth.js"));
-    this.app.use("/dashboard", require("../routes/dashboard.js"));
 
     this.app.listen(process.env.EXPRESS_PORT || 3000, () => {
       console.log("Ready");
@@ -68,36 +63,51 @@ class Server {
   }
 
   setModels() {
-    const sequelize = new Sequelize({
-      dialect: "mysql",
-      host: process.env.MYSQL_HOST,
-      database: process.env.MYSQL_DB_NAME,
-      username: process.env.MYSQL_USERNAME,
-      password: process.env.MYSQL_PASS,
-      port: parseInt(process.env.MYSQL_PORT),
-      logging: true
+    const knex = require("knex").default({
+      client: "mysql",
+      connection: {
+        host: process.env.MYSQL_HOST,
+        port: parseInt(process.env.MYSQL_PORT),
+        user: process.env.MYSQL_USERNAME,
+        password: process.env.MYSQL_PASS,
+        database: process.env.MYSQL_DB_NAME
+      },
+      log: {
+        debug(message) {
+          console.log(`[MYSQL DEBUG]`, message);
+        },
+        error(message) {
+          console.log(`[MYSQL ERROR]`, message);
+        },
+        warn(message) {
+          console.log(`[MYSQL WARN]`, message);
+        }
+      },
+      debug: process.env.MYSQL_LOG === "true" ? true : false
     });
 
-    sequelize
-      .authenticate()
-      .then(() => {
-        console.log("Sucessfully connected");
-        // this.sequelize = sequelize;
-        let psport = require("./Strategy.js");
-        new psport(sequelize).run();
-        fs.readdirSync("src/models").forEach((f) => {
-          const Models = require(`../models/${f}`);
-          let models = new Models(sequelize);
-          models.run();
-        });
-        sequelize.sync({
-          force: process.env.MYSQL_FORCE_REPLACE === "true" ? true : false,
-          alter: process.env.MYSQL_ALTER === "true" ? true : false
-        });
-      })
-      .catch((r) => {
-        console.log("Failed to", r.message);
-      });
+    // Register Models
+    fs.readdirSync("src/models").forEach((f) => {
+      const Models = require(`../models/${f}`);
+      let models = new Models(knex);
+      models.run();
+    });
+    let psport = require("./Strategy.js");
+    new psport(knex).run();
+
+    // Register all routes
+    fs.readdirSync("src/routes").forEach((f) => {
+      const Routes = require(`../routes/${f}`);
+      let routes = new Routes(knex);
+      this.app.use(`/${routes.opt.name}`, routes.run());
+    });
+
+    (async () => {
+      // Get single data
+      console.log(JSON.parse(JSON.stringify(await knex("pelanggaran_siswa").select("nama_pelanggaran").where({ nis: 12345 }).first())));
+      // Get all data
+      console.log(JSON.parse(JSON.stringify(await knex("pelanggaran_siswa").select("nama_pelanggaran").where({ nis: 12345 }))));
+    })();
   }
 }
 
