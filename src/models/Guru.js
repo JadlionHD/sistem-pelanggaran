@@ -1,7 +1,7 @@
 const { Knex } = require("knex");
 const IModel = require("../abstracts/IModel");
 
-class User extends IModel {
+class Guru extends IModel {
   /**
    * @param {Knex} knex
    */
@@ -10,24 +10,25 @@ class User extends IModel {
     this.knex = knex;
   }
   async run() {
-    this.knex.schema.hasTable("user").then((exist) => {
+    this.knex.schema.hasTable("user_guru").then((exist) => {
       if (!exist) {
         this.knex.schema
-          .createTable("user", (tb) => {
-            tb.increments("id", { primaryKey: true });
-
+          .createTable("user_guru", (tb) => {
+            tb.increments("id", { primaryKey: true }).unsigned().unique();
             tb.string("username", 255).notNullable();
             tb.string("nama_lengkap", 255).notNullable();
+            tb.integer("nip").unsigned().nullable();
             tb.string("pass", 255).notNullable();
             tb.integer("level").notNullable();
+            tb.integer("kelas_id").unsigned().references("kelas.id");
             tb.timestamps(true, true, true);
           })
           .then(async () => {
-            await this.knex("user").insert({ username: "admin", nama_lengkap: "Pesulap Merah", pass: "123", level: 5 });
+            await this.knex("user_guru").insert({ username: "gurubk", nama_lengkap: "Agus", nip: null, pass: "123", level: 2, kelas_id: 1 });
           });
       }
     });
   }
 }
 
-module.exports = User;
+module.exports = Guru;

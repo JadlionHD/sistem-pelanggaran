@@ -1,31 +1,35 @@
+const { Knex } = require("knex");
 const passport = require("passport");
-const { Sequelize, Model, ModelCtor } = require("sequelize");
 const LocalPassport = require("passport-local").Strategy;
 
 class LocalAuth {
   /**
    *
-   * @param {Sequelize} sequelize
+   * @param {Knex} knex
    */
-  constructor(sequelize) {
-    if (!sequelize) throw new Error("Database needed");
-    this.sequelize = sequelize;
+  constructor(knex) {
+    if (!knex) throw new Error("Database needed");
+    this.knex = knex;
   }
 
   /**
-   * @param {string} modelName
-   * @param {Model<any, any>} opt
-   * @returns {Promise<Model<any, any>>}
+   * @param {string} tableName
+   * @param {Knex.Raw<any, any>} opt
+   * @returns {Promise<Knex.Raw<any, any>>}
    */
-  async findOne(modelName, opt) {
-    return await this.sequelize.models[modelName].findOne(opt);
+  async findOne(tableName, opt) {
+    return JSON.parse(JSON.stringify(await this.knex(tableName).select().where(opt).first()));
   }
 
   run() {
     passport.serializeUser((user, done) => {
       done(null, {
         id: user.id,
-        level: user.level
+        username: user.username,
+        nis: user.nis ? user.nis : null,
+        nip: user.nip ? user.nip : null,
+        kelas_id: user.kelas_id ? user.kelas_id : null,
+        level: user.level ? user.level : null
       });
     });
     passport.deserializeUser(async (user, done) => {
@@ -33,13 +37,14 @@ class LocalAuth {
         let data = null;
         if (user.level === 0 || user.level === 3 || user.level === 5) {
           data = await this.findOne("user", {
-            where: {
-              id: user.id,
-              level: user.level >= 6 ? null : user.level
-            }
+            id: user.id,
+            level: user.level >= 6 ? null : user.level
           });
         } else if (user.level === 1 || user.level === 2) {
         } else if (user.level === 4) {
+          data = await this.findOne("user_siswa", {
+            nis: user.nis
+          });
         } else {
           throw "Invalid level";
         }
@@ -48,7 +53,10 @@ class LocalAuth {
           done(null, {
             id: data.id,
             username: data.username,
+            nis: user.nis ? user.nis : null,
+            nip: user.nip ? user.nip : null,
             nama_lengkap: data.nama_lengkap,
+            kelas_id: user.kelas_id ? user.kelas_id : null,
             level: data.level
           });
         } else {
@@ -68,19 +76,23 @@ class LocalAuth {
         },
         async (req, username, password, done) => {
           try {
+            console.log(req.body);
             let body = req.body;
             if (!body.username && !body.password && !body.sebagai) return;
 
             let data = null;
-            if (body.sebagai === "5") {
-              let level = isNaN(body.sebagai) ? null : parseInt(body.sebagai);
+            let level = isNaN(body.sebagai) ? null : parseInt(body.sebagai);
 
+            if (body.sebagai === "5") {
               data = await this.findOne("user", {
-                where: {
-                  username: body.username,
-                  pass: body.password,
-                  level: level >= 6 ? null : level
-                }
+                username: body.username,
+                pass: body.password,
+                level: level >= 6 ? null : level
+              });
+            } else if (body.sebagai === "4") {
+              data = await this.findOne("user_siswa", {
+                nis: body.username,
+                tgl_lahir: body.password
               });
             }
             if (data !== null) {
@@ -89,6 +101,7 @@ class LocalAuth {
               throw "No data found";
             }
           } catch (err) {
+            console.log(err);
             return done(err, null);
           }
         }
